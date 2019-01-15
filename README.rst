@@ -48,6 +48,7 @@ Stretch:
 * Analyze audio for breaks (to identify splices)
 * Count frames by diffing each frame
 * Compare known times for flags
+* Identify what game and what kind of run is submitted
 
 License
 -------
