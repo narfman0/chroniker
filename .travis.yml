@@ -1,0 +1,4 @@
+install: pip install pipenv
+language: python
+python: 3.6
+script: make test
