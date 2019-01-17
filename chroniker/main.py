@@ -1,11 +1,9 @@
-import logging
-
 import cv2
-
 from matplotlib import pyplot as plt
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
+from chroniker import util
+
+logger = util.create_logger(__name__)
 
 
 def read_image(path):
@@ -30,33 +28,39 @@ def generate_frames_from_video(video_path):
     count = 1
     while success:
         success, image = vidcap.read()
-        logger.info("Read new frame #%d: %s", count, success)
+        logger.debug(f"Read new frame #{count}: {success}")
         count += 1
         yield image
 
 
-def match_image(img1, img2, des1, des2, kp1, kp2):
+def match_image(img1, img2, des1, des2, kp1, kp2, flann=True):
     """ Given the descripters from model, does image match """
-    matches = match_flann(des1, des2)
-    # matches = match_flann(des1, des2)
+    if flann:
+        matches = match_flann(des1, des2)
+    else:
+        matches = match_bruteforce(des1, des2)
     # Need to draw only good matches, so create a mask
-    matchesMask = [[0, 0] for i in range(len(matches))]
+    matches_mask = [[0, 0] for i in range(len(matches))]
     # ratio test as per Lowe's paper
     try:
         for i, (m, n) in enumerate(matches):
             if m.distance < 0.7 * n.distance:
-                matchesMask[i] = [1, 0]
+                matches_mask[i] = [1, 0]
     except Exception as e:
-        logger.error("Received exception in match enumeration: %s", e)
+        logger.error(f"Received exception in match enumeration: {e}")
         return
+    return matches, matches_mask
+
+
+def draw_matches(img1, kp1, img2, kp2, matches, matches_mask):
     draw_params = dict(
         matchColor=(0, 255, 0),
         singlePointColor=(255, 0, 0),
-        matchesMask=matchesMask,
+        matchesMask=matches_mask,
         flags=0,
     )
-    img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
-    plt.imshow(img3), plt.show()
+    img = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
+    plt.imshow(img), plt.show()
 
 
 def match_bruteforce(des1, des2):

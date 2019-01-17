@@ -19,7 +19,7 @@ init-dev:
 	pipenv install -d
 
 run-test:
-	pipenv run pytest --flake8 --black --cov=chroniker --cov-report term-missing tests/
+	pipenv run pytest --flake8 --black --cov=chroniker --cov-report term-missing tests/ -s
 
 release: clean
 	pipenv run twine upload
