@@ -8,20 +8,14 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 
 
-def create_detector():
-    return cv2.xfeatures2d.FREAK_create()
-    # return BRISK_create()
-
-
 def read_image(path):
     return cv2.imread(path, 0)
 
 
-def train_model(img, detector):
+def train_model(img):
     """ Train a model based on the image
     returns: keypoints, descriptors tuple
     """
-    # return detector.detect(img, None)
     fast = cv2.FastFeatureDetector_create(threshold=60, nonmaxSuppression=False)
     kp = fast.detect(img, None)
     freak = cv2.xfeatures2d.FREAK_create()
